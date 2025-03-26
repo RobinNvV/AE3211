@@ -78,17 +78,31 @@ def calculate_passenger_points(passenger_load_lst, current_load):
     return front_points, back_points
 
 # Calculate loading points for window and aisle (difference for aisle is that window is already seated)
-window_front, window_back = calculate_passenger_points(passenger_load_lst, current_load)
-aisle_front, aisle_back = calculate_passenger_points(passenger_load_lst, current_load + passenger_load_lst)
+window_front_points, window_back_points = calculate_passenger_points(passenger_load_lst, current_load)
+aisle_front_points, aisle_back_points = calculate_passenger_points(passenger_load_lst, current_load + passenger_load_lst)
+
+
+# Find minimum and maximum CG in all points lists
+all_points = fuel_loading_points + window_front_points + window_back_points + aisle_front_points + aisle_back_points
+min_cg = min(point[0] for point in all_points)
+max_cg = max(point[0] for point in all_points)
+min_weight = min(point[1] for point in all_points)
+max_weight = max(point[1] for point in all_points)
+
+print(f"Minimum CG: {min_cg}")
+print(f"Maximum CG: {max_cg}")
+
 
 # Plotting
-plt.scatter(*zip(*fuel_loading_points), color='r')
-plt.scatter(*zip(*window_front), color='b')
-plt.scatter(*zip(*window_back), color='g')
-plt.scatter(*zip(*aisle_front), color='y')
-plt.scatter(*zip(*aisle_back), color='m')
-plt.legend(["Fuel Loading", "Window Front", "Window Back", "Aisle Front", "Aisle Back"])
+plt.scatter(*zip(*fuel_loading_points), color='r', label="Fuel Loading")
+plt.scatter(*zip(*window_front_points), color='b', label="Window Seating (Front to Back)")
+plt.scatter(*zip(*window_back_points), color='g', label="Window Seating (Back to Front)")
+plt.scatter(*zip(*aisle_front_points), color='y', label="Aisle Seating (Front to Back)")
+plt.scatter(*zip(*aisle_back_points), color='m', label="Aisle Seating (Back to Front)")
+plt.vlines([min_cg*0.98, max_cg*1.02], min_weight, max_weight, linestyles='dashed', colors='k', alpha=0.5, label="CG Limits")
 plt.xlabel("CG Position")
 plt.ylabel("Weight")
+plt.grid()
+plt.legend(loc = "upper left")
 plt.title("Fuel Loading Diagram")
 plt.show()
