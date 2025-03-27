@@ -182,7 +182,7 @@ print(f"Minimum cg: {cg_min0}\nMaximum cg: {cg_max0}")
 
 #plotting
 
-plt.figure(figsize=(13, 7))  # Adjust figure size
+plt.figure(1,figsize=(13, 7))  # Adjust figure size
 
 # Plot the loading diagrams
 for i in range(len(series01)):
@@ -220,5 +220,13 @@ plt.xlabel("CG Location [%LEMAC]")
 plt.title("Loading diagram")
 plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 plt.tight_layout()
+
+plt.figure(2)
+
+data = [OEW,avg_pax_weight*num_pax+cargo_aft_capacity+cargo_fw_capacity,fuel_weight_max]
+plt.pie(data,labels=["OEW","PLW","FW"],startangle=90,counterclock=False,
+        autopct='%1.1f%%',
+       pctdistance=1.25, labeldistance=.6)
 plt.show()
 
+#TODO: do absolute weight too
