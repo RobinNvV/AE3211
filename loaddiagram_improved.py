@@ -66,7 +66,7 @@ fuel_xcg = 14.43 #m ,from DSC 2. p.4
 cargo_fw_xcg = 6.697 #m, same for left and right compartment, from https://pdfcoffee.com/weight-n-balance-atr-42-72-3-pdf-free.html, p.10
 cargo_aft_xcg = 23.896 #m, see source above
 
-cargo_fw_capacity = 928 #kg, from https://pdfcoffee.com/weight-n-balance-atr-42-72-3-pdf-free.html, p.10
+cargo_fw_capacity = 928 #kg, from https://pdfcoffee.com/weight-n-balance-atr-42-72-3-pdf-free.html, p.10(31)
 cargo_aft_capacity = 768 #kg see source above
 
 #pax loading, for one column
@@ -221,12 +221,26 @@ plt.title("Loading diagram")
 plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 plt.tight_layout()
 
-plt.figure(2)
 
-data = [OEW,avg_pax_weight*num_pax+cargo_aft_capacity+cargo_fw_capacity,fuel_weight_max]
-plt.pie(data,labels=["OEW","PLW","FW"],startangle=90,counterclock=False,
-        autopct='%1.1f%%',
-       pctdistance=1.25, labeldistance=.6)
+
+
+# Plot the pie chart with MFW, MPW
+data = [[OEW,MTOW-OEW-MFW,MFW],[OEW,MPW,MTOW-OEW-MPW]]
+cols = ['#4f6d7a',"#d62828","#f77f00"]
+
+
+plt.figure(2)
+plt.pie(data[0],labels=["OEW","PW","MFW"],startangle=90,counterclock=False,
+        autopct='%1.1f%%',colors=cols, textprops={'size': 'larger'},
+       pctdistance=1.25, labeldistance=0.6)
+plt.savefig("MFW.eps")
+
+plt.figure(3)
+plt.pie(data[1],labels=["OEW","MPW","FW"],startangle=90,counterclock=False,
+        autopct='%1.1f%%', colors=cols, textprops={'size': 'larger'},
+       pctdistance=1.25, labeldistance=0.6)
+plt.savefig("MPW.eps")
+
 plt.show()
 
 #TODO: do absolute weight too
