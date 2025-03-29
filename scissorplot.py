@@ -34,7 +34,7 @@ def static_stability(x_cg):
 
     gradient = 1/((Cla_h/Cla_Ah_stat)*(1-deda)*(l_h/mac)*VhV**2)
 
-    ShS = gradient * (x_cg - x_ac - SM)
+    ShS = gradient * (x_cg - x_ac + SM)
     return ShS
 
 def controllability(x_cg):
