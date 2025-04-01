@@ -47,7 +47,7 @@ wing_group_xcg = 11.47228523 #m
 
 #PAX weight and balance
 avg_pax_weight = 80 #kg including luggage
-column_pax = 18 # pax per column
+column_pax = 14 # pax per column
 window_columns = 2
 aisle_columns = 2
 num_pax = column_pax*(window_columns+aisle_columns)
