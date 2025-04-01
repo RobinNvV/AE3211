@@ -33,16 +33,16 @@ def conversion_m_LEMAC_percent(data,MAC=MAC,LEMAC=LEMAC):
 #All calculations in [xcg]=m from nose
 
 #weight limits
-MTOW = 22800 #kg
+MTOW = 23000 #kg
 MPW = 7550 #kg
 MFW = 5000 #kg
 OEW = 13450 #kg
 
 #static group weights and cgs
-fs_group_weight = 6634.8 #kg
+fs_group_weight = 6696 #kg
 fs_group_xcg = 12.11401353 #m
-wing_group_weight = 6543.6 #kg
-wing_group_xcg = 11.46857443 #m
+wing_group_weight = 6601 #kg
+wing_group_xcg = 11.47228523 #m
 
 #PAX weight and balance
 avg_pax_weight = 80 #kg including luggage
