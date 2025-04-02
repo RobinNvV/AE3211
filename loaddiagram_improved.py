@@ -62,7 +62,7 @@ last_row_xcg = (column_pax-1)*seat_pitch+first_row_xcg
 pax_cgs = np.linspace(first_row_xcg,last_row_xcg,column_pax)
 
 #fuel cg
-fuel_xcg = 14.43-2.362-2.362 #m ,from DSC 2. p.4
+fuel_xcg = 14.43-2.362 #m ,from DSC 2. p.4
 
 #cargo cg, mass
 cargo_fw_xcg = 6.697-2.362 #m, same for left and right compartment, from https://pdfcoffee.com/weight-n-balance-atr-42-72-3-pdf-free.html, p.10
