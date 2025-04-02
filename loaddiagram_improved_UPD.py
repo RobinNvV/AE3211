@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from copy import copy
 
+plot = True
+
 #Calculate LEMAC position in ac ref. sys.
 xcg_wing = 12.11714 #m
 xcg_mac = 0.87514 #m, distance from LEMAC
@@ -23,13 +25,12 @@ def conversion_m_LEMAC_percent(data,MAC=MAC,LEMAC=LEMAC):
     Returns:
     data* with first row converted to %LEMAC
     """
-
     out = data
     for i, series in enumerate(out):
         out[i] = np.vstack([(series[0] - LEMAC) / MAC, series[1]]) 
-        
-    return out
 
+    return out
+    
 #All calculations in [xcg]=m from nose
 
 #weight limits
@@ -46,12 +47,12 @@ wing_group_xcg = 11.47228523 #m
 
 #PAX weight and balance
 avg_pax_weight = 80 #kg including luggage
-column_pax = 18 # pax per column
+column_pax = 14 # pax per column
 window_columns = 2
 aisle_columns = 2
 num_pax = column_pax*(window_columns+aisle_columns)
 
-first_row_xcg = 8.494 # m, from Weight and Balance Manual page DSC 4. p.6
+first_row_xcg = 8.494-2.362 # m, from Weight and Balance Manual page DSC 4. p.6
 seat_pitch = conversion_in_m(29) #m
 
 
@@ -60,11 +61,11 @@ last_row_xcg = (column_pax-1)*seat_pitch+first_row_xcg
 pax_cgs = np.linspace(first_row_xcg,last_row_xcg,column_pax)
 
 #fuel cg
-fuel_xcg = 14.43 #m ,from DSC 2. p.4
+fuel_xcg = 14.43-2.362 #m ,from DSC 2. p.4
 
 #cargo cg, mass
-cargo_fw_xcg = 6.697 #m, same for left and right compartment, from https://pdfcoffee.com/weight-n-balance-atr-42-72-3-pdf-free.html, p.10
-cargo_aft_xcg = 23.896 #m, see source above
+cargo_fw_xcg = 6.697-2.362 #m, same for left and right compartment, from https://pdfcoffee.com/weight-n-balance-atr-42-72-3-pdf-free.html, p.10
+cargo_aft_xcg = 23.896-2.362 #m, see source above
 
 cargo_fw_capacity = 928 #kg, from https://pdfcoffee.com/weight-n-balance-atr-42-72-3-pdf-free.html, p.10(31)
 cargo_aft_capacity = 768 #kg see source above
@@ -91,13 +92,6 @@ cargo_aft_weights = np.linspace(0,cargo_aft_capacity)
 
 cargo_fw_moments =  cargo_fw_weights*cargo_fw_xcg
 cargo_aft_moments =  cargo_aft_weights*cargo_aft_xcg
-
-#fuel loading
-
-fuel_weight_max = np.min([MFW,MTOW-OEW-cargo_aft_capacity-cargo_fw_capacity-num_pax*avg_pax_weight])
-
-fuel_weights = np.linspace(0,fuel_weight_max)
-fuel_moments = fuel_weights*fuel_xcg
 
 class Group:
     
@@ -150,7 +144,14 @@ def extract_extreme_cgs(*series):
 Fuselage = np.vstack([fs_group_weight*fs_group_xcg,fs_group_weight])
 Wing = np.vstack([wing_group_weight*wing_group_xcg,wing_group_weight])
 Structure = Fuselage + Wing #acts as base
-Structure[1] = OEW #set base weight manually to OEW
+Wmin = float(Structure[1])
+
+#fuel loading
+
+fuel_weight_max = np.min([MFW,MTOW-Wmin-cargo_aft_capacity-cargo_fw_capacity-num_pax*avg_pax_weight])
+
+fuel_weights = np.linspace(0,fuel_weight_max)
+fuel_moments = fuel_weights*fuel_xcg
 
 #dynamic
 CargoF1 = Group(np.vstack([cargo_fw_moments,cargo_fw_weights]),"Load forward compartment",'maroon')
@@ -168,7 +169,7 @@ Pax_aisle_aft_to_fw = Group(aisle_columns*np.vstack([pax_moments_aft_to_fw,pax_w
 Fuel = Group(np.vstack([fuel_moments,fuel_weights]),"Fuel")
 
 NullGroup = Group(np.zeros((2,1)),None)
-
+print(f"Empty mass cg: {float(Structure[0]/Structure[1])} m = {float(conversion_m_LEMAC_percent([np.array([[Structure[0]/Structure[1]],[Structure[1]]]),])[0][0])} LEMAC")
 #assembly
 series01_raw, names01, colors01 = assemble(CargoF1,CargoA1,Pax_window_fw_to_aft,Pax_aisle_fw_to_aft,Fuel,base=Structure)
 series02_raw, names02, colors02 = assemble(CargoA2,CargoF2,Pax_window_aft_to_fw,Pax_aisle_aft_to_fw,NullGroup,base=Structure)
@@ -177,70 +178,70 @@ series01 = conversion_m_LEMAC_percent(series01_raw)
 series02 = conversion_m_LEMAC_percent(series02_raw)
 
 cg_min0, cg_max0 = extract_extreme_cgs(series01,series02)
-print(f"Minimum cg: {cg_min0}\nMaximum cg: {cg_max0}")
+print(f"Minimum cg: {cg_min0-0.02}\nMaximum cg: {cg_max0+0.02}")
+
+if plot:
+    #plotting
+
+    plt.figure(1,figsize=(13, 7))  # Adjust figure size
+
+    # Plot the loading diagrams
+    for i in range(len(series01)):
+        plt.plot(series01[i][0], series01[i][1], label=names01[i],color=colors01[i])
+        plt.plot(series02[i][0], series02[i][1], label=names02[i],color=colors02[i])
+
+    x_margin = 0.15 * (cg_max0 - cg_min0)  # 15% extra space on x-axis
+    y_margin = 0.1 * (MTOW - OEW)  # 10% extra space on y-axis
+
+    plt.xlim(cg_min0 - x_margin, cg_max0 + x_margin)
+    plt.ylim(OEW - y_margin, MTOW + y_margin)
+
+    # Plot CG limits with labels
+    plt.axhline(Wmin, linestyle='dashed', color='k', alpha=0.5)
+    plt.text(0.5*(cg_min0+cg_max0),Wmin-y_margin/5, "$W_{min}$", color='k', va='top', fontsize=12)
+
+    plt.axhline(MTOW, linestyle='dashed', color='k', alpha=0.5)
+    plt.text(0.5*(cg_min0+cg_max0),MTOW+y_margin/5, "MTOW", color='k', va='bottom', fontsize=12)
+
+    plt.axvline(cg_min0, linestyle='dashed', color='k', alpha=0.5)
+    plt.text(cg_min0+x_margin/6, 0.5*(OEW+MTOW)-1000, "Min CG", color='k', ha='left', fontsize=12,rotation=-90)
+
+    plt.axvline(cg_max0, linestyle='dashed', color='k', alpha=0.5)
+    plt.text(cg_max0-x_margin/6, 0.5*(OEW+MTOW)-1000, "Max CG", color='k', ha='right', fontsize=12,rotation=-90)
+
+    plt.axvline(cg_min0-0.02, linestyle='dashed', color='k', alpha=0.5)
+    plt.text(cg_min0-0.02-x_margin/6, 0.5*(OEW+MTOW)-1000, "-2% margin", color='k', ha='right', fontsize=12,rotation=-90)
+
+    plt.axvline(cg_max0+0.02, linestyle='dashed', color='k', alpha=0.5)
+    plt.text(cg_max0+0.02+x_margin/6, 0.5*(OEW+MTOW)-1000, "+2% margin", color='k', ha='left', fontsize=12,rotation=-90)
+
+    plt.grid()
+    plt.ylabel("Loaded Mass [kg]")
+    plt.xlabel("CG Location [%LEMAC]")
+    plt.title("Loading diagram")
+    plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+    plt.tight_layout()
+    plt.savefig("loaddiagram.png")
+    plt.savefig("loaddiagram.pdf")
+    plt.show()
 
 
-#plotting
-
-plt.figure(1,figsize=(13, 7))  # Adjust figure size
-
-# Plot the loading diagrams
-for i in range(len(series01)):
-    plt.plot(series01[i][0], series01[i][1], label=names01[i],color=colors01[i])
-    plt.plot(series02[i][0], series02[i][1], label=names02[i],color=colors02[i])
-
-x_margin = 0.15 * (cg_max0 - cg_min0)  # 15% extra space on x-axis
-y_margin = 0.1 * (MTOW - OEW)  # 10% extra space on y-axis
-
-plt.xlim(cg_min0 - x_margin, cg_max0 + x_margin)
-plt.ylim(OEW - y_margin, MTOW + y_margin)
-
-# Plot CG limits with labels
-plt.axhline(OEW, linestyle='dashed', color='k', alpha=0.5)
-plt.text(0.5*(cg_min0+cg_max0),OEW-y_margin/5, "OEW", color='k', va='top', fontsize=12)
-
-plt.axhline(MTOW, linestyle='dashed', color='k', alpha=0.5)
-plt.text(0.5*(cg_min0+cg_max0),MTOW+y_margin/5, "MTOW", color='k', va='bottom', fontsize=12)
-
-plt.axvline(cg_min0, linestyle='dashed', color='k', alpha=0.5)
-plt.text(cg_min0+x_margin/6, 0.5*(OEW+MTOW)-1000, "Min CG", color='k', ha='left', fontsize=12,rotation=-90)
-
-plt.axvline(cg_max0, linestyle='dashed', color='k', alpha=0.5)
-plt.text(cg_max0-x_margin/6, 0.5*(OEW+MTOW)-1000, "Max CG", color='k', ha='right', fontsize=12,rotation=-90)
-
-plt.axvline(cg_min0-0.02, linestyle='dashed', color='k', alpha=0.5)
-plt.text(cg_min0-0.02-x_margin/6, 0.5*(OEW+MTOW)-1000, "-2% margin", color='k', ha='right', fontsize=12,rotation=-90)
-
-plt.axvline(cg_max0+0.02, linestyle='dashed', color='k', alpha=0.5)
-plt.text(cg_max0+0.02+x_margin/6, 0.5*(OEW+MTOW)-1000, "+2% margin", color='k', ha='left', fontsize=12,rotation=-90)
-
-plt.grid()
-plt.ylabel("Loaded Mass [kg]")
-plt.xlabel("CG Location [%LEMAC]")
-plt.title("Loading diagram")
-plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-plt.tight_layout()
+"""
+    # Plot the pie chart with MFW, MPW
+    data = [[OEW,MTOW-OEW-MFW,MFW],[OEW,MPW,MTOW-OEW-MPW]]
+    cols = ['#4f6d7a',"#d62828","#f77f00"]
 
 
+    plt.figure(2)
+    plt.pie(data[0],labels=["OEW","PW","MFW"],startangle=90,counterclock=False,
+            autopct='%1.1f%%',colors=cols, textprops={'size': 'larger'},
+        pctdistance=1.25, labeldistance=0.6)
+    plt.savefig("MFW.eps")
 
-
-# Plot the pie chart with MFW, MPW
-data = [[OEW,MTOW-OEW-MFW,MFW],[OEW,MPW,MTOW-OEW-MPW]]
-cols = ['#4f6d7a',"#d62828","#f77f00"]
-
-
-plt.figure(2)
-plt.pie(data[0],labels=["OEW","PW","MFW"],startangle=90,counterclock=False,
-        autopct='%1.1f%%',colors=cols, textprops={'size': 'larger'},
-       pctdistance=1.25, labeldistance=0.6)
-plt.savefig("MFW.eps")
-
-plt.figure(3)
-plt.pie(data[1],labels=["OEW","MPW","FW"],startangle=90,counterclock=False,
-        autopct='%1.1f%%', colors=cols, textprops={'size': 'larger'},
-       pctdistance=1.25, labeldistance=0.6)
-plt.savefig("MPW.eps")
-
-plt.show()
-
-#TODO: do absolute weight too
+    plt.figure(3)
+    plt.pie(data[1],labels=["OEW","MPW","FW"],startangle=90,counterclock=False,
+            autopct='%1.1f%%', colors=cols, textprops={'size': 'larger'},
+        pctdistance=1.25, labeldistance=0.6)
+    plt.savefig("MPW.eps")
+"""
+    #TODO: do absolute weight too
