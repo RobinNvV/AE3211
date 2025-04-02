@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from copy import copy
 
 plot = True
+save = False
 
 #Calculate LEMAC position in ac ref. sys.
 xcg_wing = 12.11714 #m
@@ -61,7 +62,7 @@ last_row_xcg = (column_pax-1)*seat_pitch+first_row_xcg
 pax_cgs = np.linspace(first_row_xcg,last_row_xcg,column_pax)
 
 #fuel cg
-fuel_xcg = 14.43 #m ,from DSC 2. p.4
+fuel_xcg = 14.43-2.362 #m ,from DSC 2. p.4
 
 #cargo cg, mass
 cargo_fw_xcg = 6.697-2.362 #m, same for left and right compartment, from https://pdfcoffee.com/weight-n-balance-atr-42-72-3-pdf-free.html, p.10
@@ -117,7 +118,8 @@ def assemble(*groups:Group,base:None|np.ndarray=None):
         running = group.data + base
         base = running[:,-1].reshape(2,1)
         cgs = running[0]/running[1]
-        series.append(np.vstack([cgs,running[1]]))
+        weigths = running[1]-Wmin+OEW
+        series.append(np.vstack([cgs,weigths]))
         names.append(group.name)
         colors.append(group.color)
 
@@ -148,7 +150,7 @@ Wmin = float(Structure[1])
 
 #fuel loading
 
-fuel_weight_max = np.min([MFW,MTOW-Wmin-cargo_aft_capacity-cargo_fw_capacity-num_pax*avg_pax_weight])
+fuel_weight_max = np.min([MFW,MTOW-OEW-cargo_aft_capacity-cargo_fw_capacity-num_pax*avg_pax_weight])
 
 fuel_weights = np.linspace(0,fuel_weight_max)
 fuel_moments = fuel_weights*fuel_xcg
@@ -166,63 +168,118 @@ Pax_aisle_fw_to_aft = Group(aisle_columns*np.vstack([pax_moments_fw_to_aft,pax_w
 Pax_window_aft_to_fw = Group(window_columns*np.vstack([pax_moments_aft_to_fw,pax_weights]),"Window seats, back to front")
 Pax_aisle_aft_to_fw = Group(aisle_columns*np.vstack([pax_moments_aft_to_fw,pax_weights]),"Aisle seats, back to front")
 
-Fuel = Group(np.vstack([fuel_moments,fuel_weights]),"Fuel")
+Fuel1 = Group(np.vstack([fuel_moments,fuel_weights]),"Fuel","lime")
+Fuel2 = copy(Fuel1)
+Fuel2.name = None
 
 NullGroup = Group(np.zeros((2,1)),None)
 print(f"Empty mass cg: {float(Structure[0]/Structure[1])} m = {float(conversion_m_LEMAC_percent([np.array([[Structure[0]/Structure[1]],[Structure[1]]]),])[0][0])} LEMAC")
 #assembly
-series01_raw, names01, colors01 = assemble(CargoF1,CargoA1,Pax_window_fw_to_aft,Pax_aisle_fw_to_aft,Fuel,base=Structure)
-series02_raw, names02, colors02 = assemble(CargoA2,CargoF2,Pax_window_aft_to_fw,Pax_aisle_aft_to_fw,NullGroup,base=Structure)
+
+#cargo, pax, fuel
+series01_raw, names01, colors01 = assemble(CargoF1,CargoA1,Pax_window_fw_to_aft,Pax_aisle_fw_to_aft,Fuel1,base=Structure)
+series02_raw, names02, colors02 = assemble(CargoA2,CargoF2,Pax_window_aft_to_fw,Pax_aisle_aft_to_fw,Fuel2,base=Structure)
+
+#fuel,cargo,pax
+series11_raw, names11, colors11 = assemble(Fuel1,CargoF1,CargoA1,Pax_window_fw_to_aft,Pax_aisle_fw_to_aft,base=Structure)
+series12_raw, names12, colors12 = assemble(Fuel2,CargoA2,CargoF2,Pax_window_aft_to_fw,Pax_aisle_aft_to_fw,base=Structure)
+
+#pax,fuel,cargo
+series21_raw, names21, colors21 = assemble(Pax_window_fw_to_aft,Pax_aisle_fw_to_aft,Fuel1,CargoF1,CargoA1,base=Structure)
+series22_raw, names22, colors22 = assemble(Pax_window_aft_to_fw,Pax_aisle_aft_to_fw,Fuel2,CargoA2,CargoF2,base=Structure)
+
+#fuel,pax,cargo
+series31_raw, names31, colors31 = assemble(Fuel1,Pax_window_fw_to_aft,Pax_aisle_fw_to_aft,CargoA1,CargoF1,base=Structure)
+series32_raw, names32, colors32 = assemble(Fuel2,Pax_window_aft_to_fw,Pax_aisle_aft_to_fw,CargoF2,CargoA2,base=Structure)
+
+#cargo, fuel, pax
+series41_raw, names41, colors41 = assemble(CargoF1,CargoA1,Fuel1,Pax_window_fw_to_aft,Pax_aisle_fw_to_aft,base=Structure)
+series42_raw, names42, colors42 = assemble(CargoA2,CargoF2,Fuel2,Pax_window_aft_to_fw,Pax_aisle_aft_to_fw,base=Structure)
+
+#pax,cargo,fuel
+series51_raw, names51, colors51 = assemble(Pax_window_fw_to_aft,Pax_aisle_fw_to_aft,CargoF1,CargoA1,Fuel1,base=Structure)
+series52_raw, names52, colors52 = assemble(Pax_window_aft_to_fw,Pax_aisle_aft_to_fw,CargoA2,CargoF2,Fuel2,base=Structure)
+
 
 series01 = conversion_m_LEMAC_percent(series01_raw)
 series02 = conversion_m_LEMAC_percent(series02_raw)
 
-cg_min0, cg_max0 = extract_extreme_cgs(series01,series02)
-print(f"Minimum cg: {cg_min0-0.02}\nMaximum cg: {cg_max0+0.02}")
+series11 = conversion_m_LEMAC_percent(series11_raw)
+series12 = conversion_m_LEMAC_percent(series12_raw)
 
-if plot:
-    #plotting
+series21 = conversion_m_LEMAC_percent(series21_raw)
+series22 = conversion_m_LEMAC_percent(series22_raw)
 
-    plt.figure(1,figsize=(13, 7))  # Adjust figure size
+series31 = conversion_m_LEMAC_percent(series31_raw)
+series32 = conversion_m_LEMAC_percent(series32_raw)
+
+series41 = conversion_m_LEMAC_percent(series41_raw)
+series42 = conversion_m_LEMAC_percent(series42_raw)
+
+series51 = conversion_m_LEMAC_percent(series51_raw)
+series52 = conversion_m_LEMAC_percent(series52_raw)
+
+counter = 1
+def plot_loaddiagram(series1,series2,names1,names2,colors1,colors2,save=False,saveName=None):
+#plotting
+    global counter
+    cg_min, cg_max = extract_extreme_cgs(series1,series2)
+    print(f'#{counter}: Minimum cg: {cg_min-0.02}\tMaximum cg: {cg_max+0.02}')
+    counter += 1
+    plt.figure(figsize=(10, 7))  # Adjust figure size
 
     # Plot the loading diagrams
-    for i in range(len(series01)):
-        plt.plot(series01[i][0], series01[i][1], label=names01[i],color=colors01[i])
-        plt.plot(series02[i][0], series02[i][1], label=names02[i],color=colors02[i])
+    for i in range(len(series1)):
+        plt.plot(series1[i][0], series1[i][1], label=names1[i],color=colors1[i])
+        plt.plot(series2[i][0], series2[i][1], label=names2[i],color=colors2[i])
 
-    x_margin = 0.15 * (cg_max0 - cg_min0)  # 15% extra space on x-axis
+    plt.gca().set_aspect('auto')
+
+    x_margin = 0.15 * (cg_max - cg_min)  # 15% extra space on x-axis
     y_margin = 0.1 * (MTOW - OEW)  # 10% extra space on y-axis
 
-    plt.xlim(cg_min0 - x_margin, cg_max0 + x_margin)
+    plt.xlim(cg_min - x_margin, cg_max + x_margin)
     plt.ylim(OEW - y_margin, MTOW + y_margin)
 
     # Plot CG limits with labels
-    plt.axhline(Wmin, linestyle='dashed', color='k', alpha=0.5)
-    plt.text(0.5*(cg_min0+cg_max0),Wmin-y_margin/5, "$W_{min}$", color='k', va='top', fontsize=12)
+    plt.axhline(OEW, linestyle='dashed', color='k', alpha=0.5)
+    plt.text(0.5*(cg_min+cg_max),OEW-y_margin/5, "OEW", color='k', va='top', fontsize=12)
 
     plt.axhline(MTOW, linestyle='dashed', color='k', alpha=0.5)
-    plt.text(0.5*(cg_min0+cg_max0),MTOW+y_margin/5, "MTOW", color='k', va='bottom', fontsize=12)
+    plt.text(0.5*(cg_min+cg_max),MTOW+y_margin/5, "MTOW", color='k', va='bottom', fontsize=12)
 
-    plt.axvline(cg_min0, linestyle='dashed', color='k', alpha=0.5)
-    plt.text(cg_min0+x_margin/6, 0.5*(OEW+MTOW)-1000, "Min CG", color='k', ha='left', fontsize=12,rotation=-90)
+    plt.axvline(cg_min, linestyle='dashed', color='k', alpha=0.5)
+    plt.text(cg_min+x_margin/6, 0.5*(OEW+MTOW)-1000, "Min CG", color='k', ha='left', fontsize=12,rotation=-90)
 
-    plt.axvline(cg_max0, linestyle='dashed', color='k', alpha=0.5)
-    plt.text(cg_max0-x_margin/6, 0.5*(OEW+MTOW)-1000, "Max CG", color='k', ha='right', fontsize=12,rotation=-90)
+    plt.axvline(cg_max, linestyle='dashed', color='k', alpha=0.5)
+    plt.text(cg_max-x_margin/6, 0.5*(OEW+MTOW)-1000, "Max CG", color='k', ha='right', fontsize=12,rotation=-90)
 
-    plt.axvline(cg_min0-0.02, linestyle='dashed', color='k', alpha=0.5)
-    plt.text(cg_min0-0.02-x_margin/6, 0.5*(OEW+MTOW)-1000, "-2% margin", color='k', ha='right', fontsize=12,rotation=-90)
+    plt.axvline(cg_min-0.02, linestyle='dashed', color='k', alpha=0.5)
+    plt.text(cg_min-0.02-x_margin/6, 0.5*(OEW+MTOW)-1000, "-2% margin", color='k', ha='right', fontsize=12,rotation=-90)
 
-    plt.axvline(cg_max0+0.02, linestyle='dashed', color='k', alpha=0.5)
-    plt.text(cg_max0+0.02+x_margin/6, 0.5*(OEW+MTOW)-1000, "+2% margin", color='k', ha='left', fontsize=12,rotation=-90)
+    plt.axvline(cg_max+0.02, linestyle='dashed', color='k', alpha=0.5)
+    plt.text(cg_max+0.02+x_margin/6, 0.5*(OEW+MTOW)-1000, "+2% margin", color='k', ha='left', fontsize=12,rotation=-90)
 
     plt.grid()
     plt.ylabel("Loaded Mass [kg]")
     plt.xlabel("CG Location [%LEMAC]")
-    plt.title("Loading diagram")
+    #plt.title("Loading diagram")
     plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
     plt.tight_layout()
-    plt.savefig("loaddiagram.png")
-    plt.show()
+
+    if save:
+        plt.savefig(f'{saveName}.png')
+
+if __name__=="__main__":
+    plot_loaddiagram(series01,series02,names01,names02,colors01,colors02,save=True,saveName='loaddiagram')
+    #plot_loaddiagram(series11,series12,names11,names12,colors11,colors12)
+    #plot_loaddiagram(series21,series22,names21,names22,colors21,colors22)
+    #plot_loaddiagram(series31,series32,names31,names32,colors31,colors32)
+    #plot_loaddiagram(series41,series42,names41,names42,colors41,colors42)
+    plot_loaddiagram(series51,series52,names51,names52,colors51,colors52,save=True,saveName='loaddiagram_extreme')
+    #plot_loaddiagram(series01,series52,names01,names52,colors01,colors52)
+    if plot:
+        plt.show()
 
 
 """
