@@ -71,7 +71,8 @@ def scissorplot(x_ac, l_h, mac, VhV, SM, Cla_h, Cla_Ah_stat, deda, CL_h, Cm_ac, 
     plt.plot(x_cg_values, controllability_values, label="Controllability")
 
     plt.plot(cg_excursion, 0.19*np.ones(cg_excursion.size), color='k', linestyle='--', label="$S_h/S$ = 0.19")
-
+    plt.text(cg_excursion[0], 0.196, f'{cg_excursion[0]}'[:6], size=12, weight='bold')
+    plt.text(cg_excursion[-1], 0.196, f'{cg_excursion[-1]}'[:6], size=12, weight='bold', horizontalalignment= 'right')
     # Fill the stable regions with green
     stable_fill = np.maximum(np.array(static_with_SM), np.array(controllability_values))
     plt.fill_between(x_cg_values, stable_fill, ylim[1],
@@ -82,6 +83,7 @@ def scissorplot(x_ac, l_h, mac, VhV, SM, Cla_h, Cla_Ah_stat, deda, CL_h, Cm_ac, 
     plt.fill_between(x_cg_values, unstable_fill, ylim[0],
                      color='red', alpha=0.3, label="Unstable Region")
 
+    # Fill the uncontrollable regions with blue
     uncontrollable_fill = np.array(controllability_values)
     plt.fill_between(x_cg_values, uncontrollable_fill, ylim[0],
                      color='blue', alpha=0.3, label="Uncontrollable Region")
