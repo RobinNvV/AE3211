@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 #######################################
 #GENERAL INPUTS
 ######################################
-x_ac = 0.05301 # Aerodynamic center
+x_ac =[          0.05301,                         ]# Aerodynamic center
 
 l_h = 13.38 # Distance between aerodynamic center and horizontal tail
 mac = 2.303 # Mean aerodynamic chord
@@ -100,7 +100,7 @@ def scissorplot(x_ac, l_h, mac, VhV, SM, Cla_h, Cla_Ah_stat, deda, CL_h, Cm_ac, 
     plt.show()
 
 n = 0
-scissorplot(x_ac, l_h, mac, VhV, SM, Cla_h[n], Cla_Ah_stat[n], deda[n], CL_h[n], Cm_ac[n], Cla_ah_cont[n], n)
+scissorplot(x_ac[n], l_h, mac, VhV, SM, Cla_h[n], Cla_Ah_stat[n], deda[n], CL_h[n], Cm_ac[n], Cla_ah_cont[n], n)
 n = 1
-scissorplot(x_ac, l_h, mac, VhV, SM, Cla_h[n], Cla_Ah_stat[n], deda[n], CL_h[n], Cm_ac[n], Cla_ah_cont[n], n)
+scissorplot(x_ac[n], l_h, mac, VhV, SM, Cla_h[n], Cla_Ah_stat[n], deda[n], CL_h[n], Cm_ac[n], Cla_ah_cont[n], n)
 
