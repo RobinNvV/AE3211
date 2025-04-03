@@ -271,12 +271,12 @@ def plot_loaddiagram(series1,series2,names1,names2,colors1,colors2,save=False,sa
         plt.savefig(f'{saveName}.png')
 
 if __name__=="__main__":
-    plot_loaddiagram(series01,series02,names01,names02,colors01,colors02,save=True,saveName='loaddiagram_HE')
+    plot_loaddiagram(series01,series02,names01,names02,colors01,colors02,save=True,saveName='figures/loaddiagram_HE')
     #plot_loaddiagram(series11,series12,names11,names12,colors11,colors12)
     #plot_loaddiagram(series21,series22,names21,names22,colors21,colors22)
     #plot_loaddiagram(series31,series32,names31,names32,colors31,colors32)
     #plot_loaddiagram(series41,series42,names41,names42,colors41,colors42)
-    plot_loaddiagram(series51,series52,names51,names52,colors51,colors52,save=True,saveName='loaddiagram_extreme_HE')
+    plot_loaddiagram(series51,series52,names51,names52,colors51,colors52,save=True,saveName='figures/loaddiagram_extreme_HE')
     #plot_loaddiagram(series01,series52,names01,names52,colors01,colors52)
     if plot:
         plt.show()

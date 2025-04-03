@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 #######################################
 #GENERAL INPUTS
 ######################################
-x_ac =[          0.05301,                         ]# Aerodynamic center
+x_ac =[          0.058293244,                   0.039795686]# Aerodynamic center
 
 l_h = 13.38 # Distance between aerodynamic center and horizontal tail
 mac = 2.303 # Mean aerodynamic chord
@@ -17,9 +17,9 @@ SM = 0.05 # Safety margin
 #######################################
 
                 #ATR72-600                      # ATR72-HE
-Cla_h = [       4.201335714,                    4.201335714] # Lift coefficient horizontal tail
-Cla_Ah_stat = [ 6.18438577,                     6.18438577] # Lift coefficient aircraft without horizontal tail stat cond
-deda = [        0.264362131,                    0.264362131] # Downwash gradient
+Cla_h = [       4.233885381,                    4.233885381] # Lift coefficient horizontal tail
+Cla_Ah_stat = [ 6.199435891,                    6.375872992] # Lift coefficient aircraft without horizontal tail stat cond
+deda = [        0.265558523,                    0.227824951] # Downwash gradient
 
 
 #######################################
@@ -27,8 +27,8 @@ deda = [        0.264362131,                    0.264362131] # Downwash gradient
 #######################################
                 #ATR72-600                      # ATR72-HE
 CL_h = [        -0.8,                           -0.8]
-Cm_ac = [       -1.073056126,                   -1.073056126] # Moment coefficient aircraft
-Cla_ah_cont = [  5.734576631,                   5.734576631] # Lift coefficient aircraft with horizontal tail cont cond
+Cm_ac = [       -1.041706838,                   -1.062157873] # Moment coefficient aircraft
+Cla_ah_cont = [  5.746312657,                   5.89482518] # Lift coefficient aircraft with horizontal tail cont cond
 
 
 
