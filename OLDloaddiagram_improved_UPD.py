@@ -221,8 +221,8 @@ if plot:
     plt.title("Loading diagram")
     plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
     plt.tight_layout()
-    plt.savefig("loaddiagram-UPD.png")
-    plt.savefig("loaddiagram-UPD.pdf")
+    #plt.savefig("loaddiagram-UPD.png")
+    #plt.savefig("loaddiagram-UPD.pdf")
     plt.show()
 
 
