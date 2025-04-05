@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from copy import copy
 
+
 plot = True
 save = False
 
@@ -36,11 +37,11 @@ def conversion_m_LEMAC_percent(data,MAC=MAC,LEMAC=LEMAC):
 
 #weight limits
 MTOW = 23000 #kg
-MPW = 7550 #kg
-MFW = 5000 #kg
-OEW = 13450 #kg
+MPW = 7550 #kg -c- 
+MFW = 5000 #kg 
+OEW = 13450 #kg -c-
 
-#static group weights and cgs
+#static group weights and cgs, use he. 
 fs_group_weight = 6696 #kg
 fs_group_xcg = 12.11401353 #m
 wing_group_weight = 6601 #kg
@@ -199,6 +200,10 @@ series42_raw, names42, colors42 = assemble(CargoA2,CargoF2,Fuel2,Pax_window_aft_
 #pax,cargo,fuel
 series51_raw, names51, colors51 = assemble(Pax_window_fw_to_aft,Pax_aisle_fw_to_aft,CargoF1,CargoA1,Fuel1,base=Structure)
 series52_raw, names52, colors52 = assemble(Pax_window_aft_to_fw,Pax_aisle_aft_to_fw,CargoA2,CargoF2,Fuel2,base=Structure)
+
+
+
+
 
 
 series01 = conversion_m_LEMAC_percent(series01_raw)
