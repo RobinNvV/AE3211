@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 #######################################
 #GENERAL INPUTS
 ######################################
-x_ac =[          0.058293244,                   0.039795686]# Aerodynamic center
+
 
 l_h = 13.38 # Distance between aerodynamic center and horizontal tail
 mac = 2.303 # Mean aerodynamic chord
@@ -20,7 +20,7 @@ SM = 0.05 # Safety margin
 Cla_h = [       4.233885381,                    4.233885381] # Lift coefficient horizontal tail
 Cla_Ah_stat = [ 6.199435891,                    6.375872992] # Lift coefficient aircraft without horizontal tail stat cond
 deda = [        0.265558523,                    0.227824951] # Downwash gradient
-
+x_ac_s =[       0.058106547,                    0.039608989]# Aerodynamic center
 
 #######################################
 # CONTRALLABILITY INPUTS
@@ -28,23 +28,23 @@ deda = [        0.265558523,                    0.227824951] # Downwash gradient
                 #ATR72-600                      # ATR72-HE
 CL_h = [        -0.8,                           -0.8]
 Cm_ac = [       -1.041706838,                   -1.062157873] # Moment coefficient aircraft
-Cla_ah_cont = [  5.746312657,                   5.89482518] # Lift coefficient aircraft with horizontal tail cont cond
+Cl_ah_cont = [  1.890335912,                    1.890335912] # Lift coefficient aircraft with horizontal tail cont cond
+x_ac_c =[       0.042576066,                    0.022027301] # Aerodynamic center
 
 
-
-def scissorplot(x_ac, l_h, mac, VhV, SM, Cla_h, Cla_Ah_stat, deda, CL_h, Cm_ac, Cla_ah_cont, n):
+def scissorplot(x_ac_c, x_ac_s, l_h, mac, VhV, SM, Cla_h, Cla_Ah_stat, deda, CL_h, Cm_ac, Cla_ah_cont, n):
     def static_stability(x_cg, SM):
 
         gradient = 1/((Cla_h/Cla_Ah_stat)*(1-deda)*(l_h/mac)*VhV**2)
 
-        ShS = gradient * (x_cg - x_ac + SM)
+        ShS = gradient * (x_cg - x_ac_s + SM)
         return ShS
 
     def controllability(x_cg):
 
         gradient = 1/((CL_h/Cla_ah_cont)*(l_h/mac)*VhV**2)
 
-        ShS = gradient * (x_cg - x_ac + Cm_ac/Cla_ah_cont)
+        ShS = gradient * (x_cg - x_ac_c + Cm_ac/Cla_ah_cont)
         return ShS
 
     x_cg_values = np.linspace(0, 1, 1000)
@@ -102,7 +102,7 @@ def scissorplot(x_ac, l_h, mac, VhV, SM, Cla_h, Cla_Ah_stat, deda, CL_h, Cm_ac, 
     plt.show()
 
 n = 0
-scissorplot(x_ac[n], l_h, mac, VhV, SM, Cla_h[n], Cla_Ah_stat[n], deda[n], CL_h[n], Cm_ac[n], Cla_ah_cont[n], n)
+scissorplot(x_ac_c[n], x_ac_s[n], l_h, mac, VhV, SM, Cla_h[n], Cla_Ah_stat[n], deda[n], CL_h[n], Cm_ac[n], Cl_ah_cont[n], n)
 n = 1
-scissorplot(x_ac[n], l_h, mac, VhV, SM, Cla_h[n], Cla_Ah_stat[n], deda[n], CL_h[n], Cm_ac[n], Cla_ah_cont[n], n)
+scissorplot(x_ac_c[n], x_ac_s[n], l_h, mac, VhV, SM, Cla_h[n], Cla_Ah_stat[n], deda[n], CL_h[n], Cm_ac[n], Cl_ah_cont[n], n)
 
