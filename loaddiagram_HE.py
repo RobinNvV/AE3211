@@ -18,7 +18,7 @@ def conversion_in_m(inch):
     "Converts inches to meters."
     return 0.0254*inch
 
-def conversion_m_LEMAC_percent(data,MAC=MAC,LEMAC=LEMAC,isArray = True):
+def conversion_m_LEMAC_percent(data,MAC=MAC,LEMAC=LEMAC):
     """
     Converts data measured in meters ac ref. sys. to fraction of MAC in LEMAC ref. sys.
     Parameters:
@@ -26,8 +26,6 @@ def conversion_m_LEMAC_percent(data,MAC=MAC,LEMAC=LEMAC,isArray = True):
     Returns:
     data* with first row converted to %LEMAC
     """
-    if not isArray:
-        return (data-LEMAC)/MAC
     out = data
     for i, series in enumerate(out):
         out[i] = np.vstack([(series[0] - LEMAC) / MAC, series[1]]) 
@@ -38,19 +36,19 @@ def conversion_m_LEMAC_percent(data,MAC=MAC,LEMAC=LEMAC,isArray = True):
 
 #weight limits
 MTOW = 23000 #kg
-MPW = 7550 #kg
+MPW = 6270 #kg
 MFW = 5000 #kg
-OEW = 13450 #kg
+OEW = 14268.58 #kg
 
 #static group weights and cgs
-fs_group_weight = 6696 #kg
-fs_group_xcg = 12.11401353 #m
-wing_group_weight = 6601 #kg
-wing_group_xcg = 11.47228523 #m
+fs_group_weight = 8327.65 #kg
+fs_group_xcg = 12.96525666 #m
+wing_group_weight = 5940.92553 #kg
+wing_group_xcg = 11.40063778 #m
 
 #PAX weight and balance
 avg_pax_weight = 80 #kg including luggage
-column_pax = 18 # pax per column
+column_pax = 14 # pax per column
 window_columns = 2
 aisle_columns = 2
 num_pax = column_pax*(window_columns+aisle_columns)
@@ -250,9 +248,6 @@ def plot_loaddiagram(series1,series2,names1,names2,colors1,colors2,save=False,sa
     plt.axhline(MTOW, linestyle='dashed', color='k', alpha=0.5)
     plt.text(0.5*(cg_min+cg_max),MTOW+y_margin/5, "MTOW", color='k', va='bottom', fontsize=12)
 
-    plt.axhline(MTOW-fuel_weight_max, linestyle='dashed',color='k',alpha=0.5)
-    plt.text(0.3*(cg_min+cg_max),MTOW-fuel_weight_max+y_margin/5,"MZFW",color='k',va='bottom',fontsize=12)
-
     plt.axvline(cg_min, linestyle='dashed', color='k', alpha=0.5)
     plt.text(cg_min+x_margin/6, 0.5*(OEW+MTOW)-1000, "Min CG", color='k', ha='left', fontsize=12,rotation=-90)
 
@@ -276,16 +271,13 @@ def plot_loaddiagram(series1,series2,names1,names2,colors1,colors2,save=False,sa
         plt.savefig(f'{saveName}.png')
 
 if __name__=="__main__":
-    plot_loaddiagram(series01,series02,names01,names02,colors01,colors02,save=True,saveName='figures/loaddiagram')
+    plot_loaddiagram(series01,series02,names01,names02,colors01,colors02,save=True,saveName='figures/loaddiagram_HE')
     #plot_loaddiagram(series11,series12,names11,names12,colors11,colors12)
     #plot_loaddiagram(series21,series22,names21,names22,colors21,colors22)
     #plot_loaddiagram(series31,series32,names31,names32,colors31,colors32)
     #plot_loaddiagram(series41,series42,names41,names42,colors41,colors42)
-    plot_loaddiagram(series51,series52,names51,names52,colors51,colors52,save=True,saveName='figures/loaddiagram_extreme')
+    plot_loaddiagram(series51,series52,names51,names52,colors51,colors52,save=True,saveName='figures/loaddiagram_extreme_HE')
     #plot_loaddiagram(series01,series52,names01,names52,colors01,colors52)
-    print(f'Fw cargo xcg in %LEMAC: {conversion_m_LEMAC_percent(cargo_fw_xcg,isArray=False)}')
-    print(f'Aft cargo xcg in %LEMAC: {conversion_m_LEMAC_percent(cargo_aft_xcg,isArray=False)}')
-    print(f'Fuel xcg in %LEMAC: {conversion_m_LEMAC_percent(fuel_xcg,isArray=False)}')
     if plot:
         plt.show()
 

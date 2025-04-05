@@ -35,15 +35,15 @@ def conversion_m_LEMAC_percent(data,MAC=MAC,LEMAC=LEMAC):
 
 #weight limits
 MTOW = 23000 #kg
-MPW = 7550 #kg
+MPW = 6270 #kg
 MFW = 5000 #kg
-OEW = 13450 #kg
+OEW = 14268.58 #kg
 
 #static group weights and cgs
-fs_group_weight = 6696 #kg
-fs_group_xcg = 12.11401353 #m
-wing_group_weight = 6601 #kg
-wing_group_xcg = 11.47228523 #m
+fs_group_weight = 8327.65 #kg
+fs_group_xcg = 12.96525666 #m
+wing_group_weight = 5940.92553 #kg
+wing_group_xcg = 11.40063778 #m
 
 #PAX weight and balance
 avg_pax_weight = 80 #kg including luggage
@@ -221,8 +221,8 @@ if plot:
     plt.title("Loading diagram")
     plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
     plt.tight_layout()
-    plt.savefig("loaddiagram.png")
-    plt.savefig("loaddiagram.pdf")
+    #plt.savefig("loaddiagram-UPD.png")
+    #plt.savefig("loaddiagram-UPD.pdf")
     plt.show()
 
 
