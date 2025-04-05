@@ -27,7 +27,7 @@ x_ac_s =[       0.058106547,                    0.039608989]# Aerodynamic center
 #######################################
                 #ATR72-600                      # ATR72-HE
 CL_h = [        -0.8,                           -0.8]
-Cm_ac = [       -1.041706838,                   -1.062157873] # Moment coefficient aircraft
+Cm_ac = [       -1.068999715,                   -1.093012671] # Moment coefficient aircraft
 Cl_ah_cont = [  1.890335912,                    1.890335912] # Lift coefficient aircraft with horizontal tail cont cond
 x_ac_c =[       0.042576066,                    0.022027301] # Aerodynamic center
 
