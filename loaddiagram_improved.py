@@ -18,7 +18,7 @@ def conversion_in_m(inch):
     "Converts inches to meters."
     return 0.0254*inch
 
-def conversion_m_LEMAC_percent(data,MAC=MAC,LEMAC=LEMAC):
+def conversion_m_LEMAC_percent(data,MAC=MAC,LEMAC=LEMAC,isArray = True):
     """
     Converts data measured in meters ac ref. sys. to fraction of MAC in LEMAC ref. sys.
     Parameters:
@@ -26,6 +26,8 @@ def conversion_m_LEMAC_percent(data,MAC=MAC,LEMAC=LEMAC):
     Returns:
     data* with first row converted to %LEMAC
     """
+    if not isArray:
+        return (data-LEMAC)/MAC
     out = data
     for i, series in enumerate(out):
         out[i] = np.vstack([(series[0] - LEMAC) / MAC, series[1]]) 
@@ -248,6 +250,9 @@ def plot_loaddiagram(series1,series2,names1,names2,colors1,colors2,save=False,sa
     plt.axhline(MTOW, linestyle='dashed', color='k', alpha=0.5)
     plt.text(0.5*(cg_min+cg_max),MTOW+y_margin/5, "MTOW", color='k', va='bottom', fontsize=12)
 
+    plt.axhline(MTOW-fuel_weight_max, linestyle='dashed',color='k',alpha=0.5)
+    plt.text(0.3*(cg_min+cg_max),MTOW-fuel_weight_max+y_margin/5,"MZFW",color='k',va='bottom',fontsize=12)
+
     plt.axvline(cg_min, linestyle='dashed', color='k', alpha=0.5)
     plt.text(cg_min+x_margin/6, 0.5*(OEW+MTOW)-1000, "Min CG", color='k', ha='left', fontsize=12,rotation=-90)
 
@@ -278,6 +283,9 @@ if __name__=="__main__":
     #plot_loaddiagram(series41,series42,names41,names42,colors41,colors42)
     plot_loaddiagram(series51,series52,names51,names52,colors51,colors52,save=True,saveName='loaddiagram_extreme')
     #plot_loaddiagram(series01,series52,names01,names52,colors01,colors52)
+    print(f'Fw cargo xcg in %LEMAC: {conversion_m_LEMAC_percent(cargo_fw_xcg,isArray=False)}')
+    print(f'Aft cargo xcg in %LEMAC: {conversion_m_LEMAC_percent(cargo_aft_xcg,isArray=False)}')
+    print(f'Fuel xcg in %LEMAC: {conversion_m_LEMAC_percent(fuel_xcg,isArray=False)}')
     if plot:
         plt.show()
 
