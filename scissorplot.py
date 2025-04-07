@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import loaddiagram_HE as lh
 
 #######################################
 #GENERAL INPUTS
@@ -62,7 +63,7 @@ def scissorplot(x_ac_c, x_ac_s, l_h, mac, VhV, SM, Cla_h, Cla_Ah_stat, deda, CL_
 
 
     # Plot the results
-    plt.figure()
+    plt.figure(figsize=(12, 8), constrained_layout=True)
 
     ylim = [0, 0.4]
 
@@ -71,8 +72,8 @@ def scissorplot(x_ac_c, x_ac_s, l_h, mac, VhV, SM, Cla_h, Cla_Ah_stat, deda, CL_
     plt.plot(x_cg_values, controllability_values, label="Controllability")
 
     plt.plot(cg_excursion, 0.19*np.ones(cg_excursion.size), color='k', linestyle='--', label="$S_h/S$ = 0.19")
-    plt.text(cg_excursion[0], 0.196, f'{cg_excursion[0]}'[:6], size=12, weight='bold')
-    plt.text(cg_excursion[-1], 0.196, f'{cg_excursion[-1]}'[:6], size=12, weight='bold', horizontalalignment= 'right')
+    plt.text(cg_excursion[0]+0.02, 0.196, f'{cg_excursion[0]}'[:6], size=12,)
+    plt.text(cg_excursion[-1], 0.196, f'{cg_excursion[-1]}'[:6], size=12, horizontalalignment= 'right')
     # Fill the stable regions with green
     stable_fill = np.maximum(np.array(static_with_SM), np.array(controllability_values))
     plt.fill_between(x_cg_values, stable_fill, ylim[1],
@@ -88,6 +89,18 @@ def scissorplot(x_ac_c, x_ac_s, l_h, mac, VhV, SM, Cla_h, Cla_Ah_stat, deda, CL_
     plt.fill_between(x_cg_values, uncontrollable_fill, ylim[0],
                      color='blue', alpha=0.3, label="Uncontrollable Region")
 
+    cgmin = np.min([lh.extract_extreme_cgs(lh.series01, lh.series02)[0],lh.extract_extreme_cgs(lh.series51, lh.series52)[0]]) 
+    cgmax = np.max([lh.extract_extreme_cgs(lh.series01, lh.series02)[1],lh.extract_extreme_cgs(lh.series51, lh.series52)[1]])
+    plt.axvline(cgmin-0.02, color='k', linestyle='--')
+    plt.axvline(cgmax+0.02, color='k', linestyle='--')
+    plt.fill_betweenx(ylim, cgmin-0.02, cgmax+0.02, color='white', alpha=0.6, label="CG Range - ATR 72-HE")
+
+    plt.axhline(np.interp(cgmax+0.02, x_cg_values, static_with_SM), 0, 1, color='gray', linewidth=2, linestyle='--')
+    plt.axhline(np.interp(cgmax+0.02, x_cg_values, static_with_SM), cgmin-0.02, cgmax+0.02, color='navy', linewidth=6)
+    plt.text((cgmax-cgmin)/2, np.interp(cgmax+0.02, x_cg_values, static_with_SM)+0.01, 'CG Range ATR 72-HE', color='navy', size=12, weight='bold', horizontalalignment= 'left')
+    plt.text(cgmin, np.interp(cgmax+0.02, x_cg_values, static_with_SM)+0.01, f'{cgmin-0.02}'[:6], size=12, weight='bold', color = 'navy', horizontalalignment= 'left')
+    plt.text(cgmax, np.interp(cgmax+0.02, x_cg_values, static_with_SM)+0.01, f'{cgmax+0.02}'[:6], size=12, weight='bold', color = 'navy', horizontalalignment= 'right')
+    plt.text(0.01, np.interp(cgmax+0.02, x_cg_values, static_with_SM)+0.005, f'{np.interp(cgmax+0.02, x_cg_values, static_with_SM)}'[:6], size=16, weight='bold', color = 'navy', verticalalignment='center', horizontalalignment= 'left')
 
     titles = ["ATR 72-600", "ATR 72-HE"]
     plt.title(f"Scissor Plot {titles[n]}", fontsize=13)
@@ -97,12 +110,11 @@ def scissorplot(x_ac_c, x_ac_s, l_h, mac, VhV, SM, Cla_h, Cla_Ah_stat, deda, CL_
     plt.xlim(0, 1)
     plt.legend(loc='best')
     plt.grid()
-
-    plt.savefig(f'figures/scissorplot{n}.pdf')
+    plt.savefig(f'figures/scissorplot{n}_new.pdf')
     plt.show()
 
 n = 0
-scissorplot(x_ac_c[n], x_ac_s[n], l_h, mac, VhV, SM, Cla_h[n], Cla_Ah_stat[n], deda[n], CL_h[n], Cm_ac[n], Cl_ah_cont[n], n)
+#scissorplot(x_ac_c[n], x_ac_s[n], l_h, mac, VhV, SM, Cla_h[n], Cla_Ah_stat[n], deda[n], CL_h[n], Cm_ac[n], Cl_ah_cont[n], n)
 n = 1
 scissorplot(x_ac_c[n], x_ac_s[n], l_h, mac, VhV, SM, Cla_h[n], Cla_Ah_stat[n], deda[n], CL_h[n], Cm_ac[n], Cl_ah_cont[n], n)
 
